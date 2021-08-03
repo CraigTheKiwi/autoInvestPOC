@@ -1,3 +1,9 @@
+# Proof of concept auto trading
+
+This is a quick proof of concept for a larger python project.  The goal here is to auto trade the 4 hour 7MA and 25MA at the crosses with a predefined pot.
+
+All the db information is stored in files for this test.
+
 # Information to load and test this project
 
 This project is just a Proof of Concept before deploying it as part of a larger Django project
