@@ -1,0 +1,6 @@
+### Current Pot - this file edited automatically ###
+### <Coin Ticker>:Active/None:<$UsedFromPot>
+Total:0
+BTC:None:0:17051.60857142857:5683.869523809523
+ETH:None:0:983.1042857142857:327.70142857142855
+DOGE:None:0:0.08901857142857142:0.02967285714285714

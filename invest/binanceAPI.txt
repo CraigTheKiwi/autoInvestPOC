@@ -1,0 +1,16 @@
+[Open Time, Open, High, Low, Close, Volume, CloseTime, Quote asset vol, # of Trades, Taker buy base asset volume, Taker buy quote asset volume, ignore]
+
+[1621929600000, '38993.91000000', '39110.00000000', '36486.00000000', '36537.16000000', '23406.30178100', 1621943999999, '878323042.15045330', 485845, '11209.18967200', '420781655.26023653', '0']
+
+# Open time
+        "0.01634790",       # Open
+        "0.80000000",       # High
+        "0.01575800",       # Low
+        "0.01577100",       # Close
+        "148976.11427815",  # Volume
+        1499644799999,      # Close time
+        "2434.19055334",    # Quote asset volume
+        308,                # Number of trades
+        "1756.87402397",    # Taker buy base asset volume
+        "28.46694368",      # Taker buy quote asset volume
+        "17928899.62484339" # Can be ignored

@@ -1,0 +1,10 @@
+###       Settings file for invest project        ###
+###### This file should be treated as read only #####
+
+### Use line Coin:<coin ticker>:<weighting to invest>
+
+Coin:BTC:0.6
+Coin:ETH:0.3
+Coin:DOGE:0.1
+
+# Other settings below this line #
