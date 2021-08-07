@@ -148,6 +148,11 @@ def executeTrade(coin, tradeType, coin_price, pot_total):
         coin["coins_purchased"] = 0
         return coin, pot_total
 
+def recordTransaction(transaction_file, date, coin, transaction_type):
+    with open(transaction_file, "a") as t:
+        t.write(date, coin["ticker"], transaction_type, coin["purchase_price"], coin["coins_purchsaed"], "\n")
+    pass
+
 # Replace with database queries later
 def savePot(coins_array, pot):
     with open(pot, "w") as p:

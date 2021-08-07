@@ -153,5 +153,17 @@ class TestExecuteSellTrade(unittest.TestCase):
         coin, self.returned_pot_total = invest.executeTrade(self.coin, "sell", 70, 90)
         self.assertEqual(self.returned_pot_total, 99.0)
 
+class TestExecuteSellTrade(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        invest.testing = False
+        succeedingFile = "invest/settings.txt"
+        cls.coins = invest.loadCoins(succeedingFile)
+        cls.api_key = invest.api_key
+        cls.api_secret= invest.api_secret
+        cls.current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
+        cls.coin, cls.pot_total = invest.executeTrade(cls.coins[0], "buy", 60, 90)
+        cls.returned_pot_total = 0
+
 if __name__ == '__main__':
     unittest.main()
