@@ -24,11 +24,12 @@ class TestLoadBTC(unittest.TestCase):
         coins = invest.loadCoins(self.succeedingFile)
         self.assertEqual(coins[2]["ticker"], "DOGE")
     def test_if_3_items_per_row(self):
-        self.assertEqual(invest.loadCoins(cls.fake_file), "test")
+        self.assertEqual(invest.loadCoins(self.fake_file), ["General Error"])
 
 class TestPot(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        invest.testing = False
         succeedingFile = "invest/settings.txt"
         cls.coins = invest.loadCoins(succeedingFile)
     def test_failed_file(self):
@@ -46,7 +47,7 @@ class TestCoins(unittest.TestCase):
     def test_coins_array_length(self):
         self.assertEqual(len(self.loaded_coins), 3)
     def test_single_coin_array_size(self):
-        self.assertEqual(len(self.loaded_coins[0]), 6)
+        self.assertEqual(len(self.loaded_coins[0]), 7)
     def test_btc_ticker(self):
         self.assertEqual(self.loaded_coins[0]["ticker"], "BTC")
     def test_btc_purchase_price(self):
@@ -104,6 +105,53 @@ class TestMovingAverages(unittest.TestCase):
         self.assertTrue(type(self.ma7) is float)
     def test_moving_averages_21(self):
         self.assertTrue(type(self.ma21) is float)
+
+class TestExecuteBuyTrade(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        invest.testing = False
+        succeedingFile = "invest/settings.txt"
+        cls.coins = invest.loadCoins(succeedingFile)
+        cls.api_key = invest.api_key
+        cls.api_secret= invest.api_secret
+        cls.current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
+    def test_buy_trade_coin_purchased(self):
+        self.coins[0], pot_total = invest.executeTrade(self.coins[0], "buy", 60, 100 )
+        self.assertEqual(self.coins[0]["coins_purchased"], 1.0)
+    def test_buy_trade_active(self):
+        coin, pot_total = invest.executeTrade(self.coins[0], "buy", 60, 100 )
+        self.assertEqual(coin["active"], "Active")
+    def test_buy_trade_calc(self):
+        test_pot_total = 95
+        self.coins[0], pot_total = invest.executeTrade(self.coins[0], "buy", 60, test_pot_total )
+        self.assertEqual(pot_total, test_pot_total)
+    def test_buy_trade_purchase_price(self):
+        test_purchase_price = 2450.22
+        self.coins[0], pot_total = invest.executeTrade(self.coins[0], "buy", test_purchase_price, 100 )
+        self.assertEqual(test_purchase_price, self.coins[0]["purchase_price"])
+
+class TestExecuteSellTrade(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        invest.testing = False
+        succeedingFile = "invest/settings.txt"
+        cls.coins = invest.loadCoins(succeedingFile)
+        cls.api_key = invest.api_key
+        cls.api_secret= invest.api_secret
+        cls.current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
+        cls.coin, cls.pot_total = invest.executeTrade(cls.coins[0], "buy", 60, 90)
+        cls.returned_pot_total = 0
+    def test_sell_trade_active(self):
+        self.assertEqual(self.coin["active"], "Active")
+    def test_sell_trade_not_active(self):
+        # selling as $10 increase in coin value
+        coin, pot_total = invest.executeTrade(self.coin, "sell", 70, 90)
+        self.assertEqual(coin["active"], "None")
+    def test_sell_trade_correct_init_pot(self):
+        self.assertEqual(self.pot_total, 90)
+    def test_sell_trade_correct_pot(self):
+        coin, self.returned_pot_total = invest.executeTrade(self.coin, "sell", 70, 90)
+        self.assertEqual(self.returned_pot_total, 99.0)
 
 if __name__ == '__main__':
     unittest.main()

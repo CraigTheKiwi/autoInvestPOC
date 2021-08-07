@@ -34,7 +34,7 @@ def loadCoins(settings):
     except IOError:
         print("Failed to load in file for coin data")
         return ["IOError"]
-    except Exception (e):
+    except Exception as e:
         print("General exception triggered: ", e)
         return ["General Error"]
 
@@ -76,6 +76,7 @@ def loadPot(coins_array, pot_file):
                             coin["purchase_price"] = int(coinInfo[2].strip("\n"))
                             coin["MA7"] = float(coinInfo[3])
                             coin["MA21"] = float(coinInfo[4])
+                            coin["coins_purchased"] = float(coinInfo[5])
 
     if testing: print(pot_total)
     if testing: print(coins_array)
@@ -131,13 +132,30 @@ def getMovingAverages(api_data, coin_name):
 def makeTradeDecision(ma7, ma21):
     return ma7 < ma21
 
+def executeTrade(coin, tradeType, coin_price, pot_total):
+    if tradeType == "buy":
+        amount_to_invest = pot_total * float(coin["weighting"])
+        coin["active"] = "Active"
+        coin["purchase_price"] = coin_price
+        coin["coins_purchased"] = amount_to_invest / coin_price
+        return coin, pot_total
+    elif tradeType == "sell":
+        coins_p = coin["coins_purchased"]
+        coins_w = coin["weighting"]
+        pot_total += (float(coin_price) * float(coins_p)) - (float(pot_total) * float(coins_w))
+        coin["active"] = "None"
+        coin["purchase_price"] = 0
+        coin["coins_purchased"] = 0
+        return coin, pot_total
+
+# Replace with database queries later
 def savePot(coins_array, pot):
     with open(pot, "w") as p:
         p.write("### Current Pot - this file edited automatically ###\n")
-        p.write("### <Coin Ticker>:Active/None:<$UsedFromPot>\n")
+        p.write("### <Coin Ticker>:Active/None:<coin purchase price>:MA7:MA21:<Coins Purchased>\n")
         p.write("Total:"+str(pot_total)+"\n")
         for coin in coins_array:
-            p.write(coin["ticker"]+":"+coin["active"]+":"+str(coin["purchase_price"])+":"+str(coin["MA7"])+":"+str(coin["MA21"])+"\n")
+            p.write(coin["ticker"]+":"+coin["active"]+":"+str(coin["purchase_price"])+":"+str(coin["MA7"])+":"+str(coin["MA21"])+ str(coin["coins_purchased"]) +"\n")
 
 def entry():
     current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
@@ -155,10 +173,12 @@ def entry():
             if ma7_above_ma21 and not prev_ma7_above_ma21:
                 # .. and not in a trade ... buy
                 if testing: print("Buy Trade recommended for coin: "+ coin["ticker"])
+                if coin["active"]: coin = executeTrade(coin, "buy", api_data[4])
                 pass
             elif prev_ma7_above_ma21 and not ma7_above_ma21:
                 # .. and in a trade ... sell
                 if testing: print("Sell Trade recommended for coin: "+ coin["ticker"])
+                if not coin["active"]: coin, pot_total = executeTrade(coin, "sell", api_data[4])
                 pass
 
         coin["MA7"] = ma7
