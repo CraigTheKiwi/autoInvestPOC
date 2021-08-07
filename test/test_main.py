@@ -153,17 +153,63 @@ class TestExecuteSellTrade(unittest.TestCase):
         coin, self.returned_pot_total = invest.executeTrade(self.coin, "sell", 70, 90)
         self.assertEqual(self.returned_pot_total, 99.0)
 
-class TestExecuteSellTrade(unittest.TestCase):
+class TestRecordTransactions(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         invest.testing = False
+        cls.transactionFile = "test/mock_transactions.txt"
         succeedingFile = "invest/settings.txt"
         cls.coins = invest.loadCoins(succeedingFile)
-        cls.api_key = invest.api_key
-        cls.api_secret= invest.api_secret
-        cls.current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
         cls.coin, cls.pot_total = invest.executeTrade(cls.coins[0], "buy", 60, 90)
-        cls.returned_pot_total = 0
+        cls.current_time = datetime.now(timezone.utc).strftime("%Y/%m/%d")  # UTC date YYYY/MM/DD
+
+    def tearDown(cls):
+        transaction_file = "test/mock_transactions.txt"
+        with open(transaction_file, "w") as t:
+            t.write("")
+
+    def test_record_transaction(self):
+        transaction = invest.recordTransaction(
+            self.transactionFile,
+            self.current_time,
+            self.coins[0],
+            "buy")
+        self.assertTrue(transaction)
+
+    def test_record_transaction_buy(self):
+        transaction = invest.recordTransaction(
+            self.transactionFile,
+            self.current_time,
+            self.coins[0],
+            "buy")
+        transaction_file = "test/mock_transactions.txt"
+        with open(transaction_file, "r") as t:
+            line = t.readline()
+            self.assertEqual(
+                line,
+                str(self.current_time) +" , " +
+                self.coin["ticker"] +" , " +
+                "buy"+ " , " +
+                str(self.coin["purchase_price"]) +" , " +
+                str(self.coin["coins_purchased"]) + "\n")
+
+    def test_record_transaction_sell(self):
+        transaction = invest.recordTransaction(
+            self.transactionFile,
+            self.current_time,
+            self.coins[0],
+            "sell")
+        transaction_file = "test/mock_transactions.txt"
+        with open(transaction_file, "r") as t:
+            line = t.readline()
+            self.assertEqual(
+                line,
+                str(self.current_time) +" , " +
+                self.coin["ticker"] +" , " +
+                "sell"+ " , " +
+                str(self.coin["purchase_price"]) +" , " +
+                str(self.coin["coins_purchased"]) + "\n")
+
 
 if __name__ == '__main__':
     unittest.main()
